@@ -1,5 +1,12 @@
 #This programm will read out article numbers from the pluradent webshop
-def scrap_pluradent(web = 1):
+
+
+#import libraries
+import requests
+import bs4
+
+#main function
+def main(web = 1):
     #returns 1, if no error
     if web == 1:
         print("web1")
@@ -11,7 +18,7 @@ def scrap_pluradent(web = 1):
     print(url)
     return "1"
 
-L = scrap_pluradent(1)
+L = main(1)
 print(L)
 
 
