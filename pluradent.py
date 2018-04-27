@@ -35,6 +35,7 @@ requests.__file__
 import bs4
 bs4.__file__
 from bs4 import BeautifulSoup
+import pandas
 
 #reading website
 #cd "C:/Users/ericb/EED-Solutions by Eric Brahmann/Ideal Dental - Code/webI/"
@@ -118,13 +119,26 @@ with open('url_soup.txt','w') as f:
 
 
 all_main_cat = soup.find_all("a",{"class":"level-top"})
-print(all_main_cat[0].text)
-l2 = all_main_cat[0].find_all("span",{"class":"label"})
+print(all_main_cat[1])
+l2 = all_main_cat[1].find_all("label")
+b = all_main_cat[1].find_all("span",{"class":"label"})
+b[0].text
+l2[0]
 
-
+I = 0
 for item in all_main_cat:
+    I = I +1
+    print (I)
     label = item.find_all("span",{"class":"label"})
-    print(label[0])
+    try:
+        is_cat = 1
+        cat = label[0].text
+    except:
+        is_cat = 0
+        cat = ''
+    if is_cat == 1:
+        print(cat)
+        
     
     
 
