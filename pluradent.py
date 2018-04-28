@@ -53,69 +53,7 @@ with open('url.txt','w') as f:
 with open('url_soup.txt','w') as f:
     f.write(str(soup))
 
-#with open('url_soup.txt','r') as f:
-#        soup_str = f.read()
 
-        
-#category-subnav--content--list--entry--link
-#<li class="category-subnav--content--list--entry">
-#            <a class="category-subnav--content--list--entry--link " href="https://shop.pluradent.de/praxisbedarf.html">
-#                Praxisbedarf            </a>
-#                <ol class="category-subnav--content--list">
-#        <li class="category-subnav--content--list--entry">
-#            <a class="category-subnav--content--list--entry--link category-subnav--content--list--entry--link-active" href="https://shop.pluradent.de/praxisbedarf/pluline-qualitaetsprodukte.html">
-#                PluLine Qualitätsprodukte            </a>
-#                <ol class="category-subnav--content--list">
-#        <li class="category-subnav--content--list--entry">
-#            <a class="category-subnav--content--list--entry--link " href="https://shop.pluradent.de/praxisbedarf/pluline-qualitaetsprodukte/praxismaterial.html">
-#                Praxismaterial            </a>
-#                    </li>
-#    </ol>
-#        <ol class="category-subnav--content--list">
-#        <li class="category-subnav--content--list--entry">
-#            <a class="category-subnav--content--list--entry--link " href="https://shop.pluradent.de/praxisbedarf/pluline-qualitaetsprodukte/praxisinstrumente.html">
-#                Praxisinstrumente            </a>
-#                    </li>
-#    </ol>
-#        <ol class="category-subnav--content--list">
-#        <li class="category-subnav--content--list--entry">
-#            <a class="category-subnav--content--list--entry--link " href="https://shop.pluradent.de/praxisbedarf/pluline-qualitaetsprodukte/kleingeraete.html">
-#                Kleingeräte            </a>
-#                    </li>
-#    </ol>
-#        <ol class="category-subnav--content--list">
-#        <li class="category-subnav--content--list--entry">
-#            <a class="category-subnav--content--list--entry--link " href="https://shop.pluradent.de/praxisbedarf/pluline-qualitaetsprodukte/ersatzteile-praxis.html">
-#                Ersatzteile Praxis (1)            </a>
-#                    </li>
-#    </ol>
-#            </li>
-#    </ol>
-#        <ol class="category-subnav--content--list">
-#        <li class="category-subnav--content--list--entry">
-#            <a class="category-subnav--content--list--entry--link " href="https://shop.pluradent.de/praxisbedarf/praxismaterial.html">
-#                Praxismaterial            </a>
-#                    </li>
-#    </ol>
-#        <ol class="category-subnav--content--list">
-#        <li class="category-subnav--content--list--entry">
-#            <a class="category-subnav--content--list--entry--link " href="https://shop.pluradent.de/praxisbedarf/praxisinstrumente.html">
-#                Praxisinstrumente            </a>
-#                    </li>
-#    </ol>
-#        <ol class="category-subnav--content--list">
-#        <li class="category-subnav--content--list--entry">
-#            <a class="category-subnav--content--list--entry--link " href="https://shop.pluradent.de/praxisbedarf/kleingeraete.html">
-#                Kleingeräte            </a>
-#                    </li>
-#    </ol>
-#        <ol class="category-subnav--content--list">
-#        <li class="category-subnav--content--list--entry">
-#            <a class="category-subnav--content--list--entry--link " href="https://shop.pluradent.de/praxisbedarf/ersatzteile-praxis.html">
-#                Ersatzteile Praxis (1851)            </a>
-#                    </li>
-#    </ol>
-#            </li>
 
 #read maincatogeries
 all_main_cat = soup.find_all("a",{"class":"level-top"})
@@ -144,14 +82,12 @@ all_subcat = soup.find_all("div",{"class":"category-teasers--wrapper--teaser--co
 l = []
 l2 = []
 I = 0
-J = 0
 for item in all_subcat:
     I = I +1
-#    print (I)
     print(I,item.text)
     print(item)
     sublinks = item.find_all("a")
-
+    J = 0
     for  link in sublinks:
         if I >= 1:
             d={}
@@ -164,26 +100,104 @@ for item in all_subcat:
                 d["index"] = I
                 d["index2"] = J
                 d["url"] = link['href']
-                d["Kategorie"] = link.text
+                d["Kategorie - Level0"] = "Praxisbedarf"
+                d["Kategorie - Level1"] = link.text
+                d["Kategorie - Level2"] = ""
                 
                 l.append(d)
         elif I == 0:
-            d2 = {}
-            d2["index"] = I
-            d2["index2"] = J
-            d2["Kategorie"] = link.text 
-            d2["url"] = ""
-            l2.append(d)
+#            d2 = {}
+#            d2["index"] = I
+#            d2["index2"] = J
+#            d2["Kategorie"] = link.text 
+#            d2["url"] = ""
+#            l2.append(d)
 #exporting            
 df = pandas.DataFrame(l)
 df.to_csv('subcategories.csv') 
+
+#-----------------------------------------------------------------------------
+
+
+    
+#---------------------------------------------------------------------
 I = 0
+l = []
+
 for index,row in df.iterrows():
     I = I+1
-    print (I)
-    print(row["Kategorie"])
-    if I == 2:
+    
+    if I == 15:
+        print (I)
+        print(row["Kategorie"])
+        r2 = requests.get(row["url"])
+        c2 = r2.content
+        soup2 = BeautifulSoup(c2,"html.parser")
+        all_subcat2 = soup2.find_all("div",{"class":"category-teasers--wrapper--teaser--image"})
         
+        J = 0
+        for item in all_subcat2:
+            d = {}
+            J = J +1
+            print("J=",J)
+            a = item.find_all("a")
+            print(item)
+            d["index"] = row["index"]
+            d["index2"] = row["index2"]
+            d["Kategorie - Level0"] = row["Kategorie - Level0"]
+            d["Kategorie - Level1"] = row["Kategorie - Level1"]
+            d["Kategorie - Level2"] = a[0].text
+            d["url"] = a[0]["href"]
+            l.append(d)
+print(l)
+
+
+
+
+
+
+
+
+
+
+
+    
+    
+
+
+
+
+
+    
+#exporting website to txt
+with open('url2.txt','w') as f:
+    f.write(str(c))
+
+with open('url_soup2.txt','w') as f:
+    f.write(str(soup2))
+
+    
+    
+url_test2 = 'https://shop.pluradent.de/praxisbedarf/pluline-qualitaetsprodukte/praxisinstrumente/instrumente-konservierend/mundspiegel-sonden-und-pinzetten.html'
+
+r = requests.get(url_test2)
+
+c = r.content
+soup3 = BeautifulSoup(c,"html.parser")  
+with open('url_soup3.txt','w') as f:
+    f.write(str(soup3))
+#---------------------------------TEST
+
+all_subcat2 = soup2.find_all("a",{"class":"category-subnav--content--list--entry--link"})  
+l = []
+l2 = []
+I = 0
+J = 0
+for item in all_subcat2:
+    I = I +1
+    print(I,item.text)
+#    print(item)
+
    
      
 #df2 = pandas.DataFrame(l2)
