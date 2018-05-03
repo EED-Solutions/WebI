@@ -257,10 +257,10 @@ for index,row in df2.iterrows():
                  d["Kategorie - Level0"] = row["Kategorie - Level0"]
                  d["Kategorie - Level1"] = row["Kategorie - Level1"]
                  d["Kategorie - Level2"] = row["Kategorie - Level2"]
-                 d["Artikelnummer"] = sku
+                 d["ArtikelNr"] = sku
                  d["url image"] = url_image
                  d["url"] = product_url
-                 d["Artielbezeichnung"] = product_name
+                 d["Name"] = product_name
                  d["Preis"] = price
                  l.append(d)
         
@@ -276,21 +276,68 @@ df3.to_csv('Produkt - Level0.csv')
 #-----------------------------------------------------------------------------
 #Product Level 1 - info von der spezifischen Produktseite
 #---------------------------------------------------------------------
+print('---------------------------------------------------------------------')
+print('Produkt Level - 1 wird ausgelesen')
+print('---------------------------------------------------------------------')
+I = 0
+J = 0
+K = 0
+l = []
+for index,row in df3.iterrows():
+     I = I+1
+     if I > 0:
+         print ("I=",I,"/", row["Kategorie - Level1"],"/",row["Kategorie - Level2"])
+         print (row["Name"],"/",row["ArtikelNr"])
+         print (row["url"])
+         url = row["url"]
+         r5 = requests.get(url)
+         c5 = r5.content
+         soup5 = BeautifulSoup(c5,"html.parser")
+         #hersteller
+         hersteller = soup5.find("div",{"class":"product-detail-page--main--introduction--info--udxpluradentzzherbz"})
+         hersteller = hersteller.find("span",{"class":"value"}).text.replace("/n","").strip()
+         sku_hersteller = soup5.find("div",{"class":"product-detail-page--main--introduction--info--manufacturer_sku"})
+         sku_hersteller = sku_hersteller.find("span",{"class":"value"}).text.replace("/n","").strip()
+         product_desc = soup5.find("div",{"class":"product-detail-page--main--details--desc"})
+         product_desc = product_desc.find("p").text.strip()
+         url_image = soup5.find("div",{"class":"product-detail-page--main--introduction--media"})
+         url_image = url_image.find("img")["src"]
+         d = {}
+         d["index"] = row["index"]
+         d["index2"] = row["index2"]
+         d["index3"] = row["index3"]
+         d["index4"] = row["index4"]
+         d["Kategorie - Level0"] = row["Kategorie - Level0"]
+         d["Kategorie - Level1"] = row["Kategorie - Level1"]
+         d["Kategorie - Level2"] = row["Kategorie - Level2"]
+         d["ArtikelNr"] = row["ArtikelNr"]
+         d["url"] = row["url"]
+         d["Name"] = row["Name"]
+         d["Preis"] = row["Preis"]
+#         neue Elemente
+         d["url image"] = url_image
+         d["Hersteller"] = hersteller
+         d["HerstellerNr"] = sku_hersteller
+         d["Beschreibung"] = product_desc
+         l.append(d)
 
 
+#print(l) 
 
+df4 = pandas.DataFrame(l)
+df4.to_csv('Produkt - Level1.csv') 
 
 #exporting website to txt
-with open('url4.txt','w') as f:
-    f.write(str(c4))
-
-with open('url_soup4.txt','w') as f:
-    f.write(str(soup4))
-
-
-
-m = re.search('(?<=abc)def', 'abcdef')
-m.group(0)
+#with open('url5.txt','w') as f:
+#    f.write(str(c5))
+#
+#with open('url_soup5.txt','w') as f:
+#    f.write(str(soup5))
+#
+#
+#
+#m = re.search('(?<=abc)def', 'abcdef')
+#m.group(0)
 
 
 
