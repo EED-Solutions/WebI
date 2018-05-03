@@ -165,10 +165,14 @@ for index,row in df1.iterrows():
 df2 = pandas.DataFrame(l)
 df2.to_csv('Kategorie - Level2.csv') 
 
-
+#df2 = pandas.read_csv('Kategorie - Level2.csv', index_col=0, parse_dates=True)
+#df2 = pandas.read_csv('Kategorie - Level2.csv',index_col=0)
 #-----------------------------------------------------------------------------
 #Product Level 0 - infos auf der Übersichtsseite
 #---------------------------------------------------------------------
+print('---------------------------------------------------------------------')
+print('Produkt Level - 0 wird ausgelesen')
+print('---------------------------------------------------------------------')
 I = 0
 J = 0
 K = 0
@@ -192,14 +196,21 @@ for index,row in df2.iterrows():
          pagecount = 0
          for page in pages2:
              K= K+1
-#             print (page["href"])
-#             print (page.text)
              if page.text.isdigit():
                  pagecount = max(int(page.text),pagecount)
          print ("pagecount=", pagecount)
+         
+          #Elements per page
+         elements = soup3.find("div",{"class":"limiter"})
+         elements = elements.find_all("option")
+         K = 0
+         for d_item in elements:
+            K = K+1
+            if d_item.has_attr('selected'):
+                elements = int(d_item.text)
+                print(elements,"elements per page")
 
-
-
+         #iterate
 #         for I in range(1,pagecount+1):
          for J in range(1,2):
              
@@ -216,6 +227,8 @@ for index,row in df2.iterrows():
              L=0
              for product in products:
                  L=L+1
+                 if L > elements:
+                     break
                  #url to image
                  image = product.find("div",{"class":"list-product-item--image"})
                  url_image=image.find("img")["src"]
@@ -228,6 +241,14 @@ for index,row in df2.iterrows():
                  pr_info_a = pr_info.find("a")
                  product_name=pr_info_a["title"]
                  product_url=pr_info_a["href"]
+
+                #price - unterelment von pr_info
+                 price = pr_info.find("div",{"class":"product-info--price"})
+                 price = price.text.replace('\n', '').strip()
+                 print(price)
+#                    <div class="product-info--price ">
+#                    9,25&nbsp;€</div>
+
                  d = {}
                  d["index"] = row["index"]
                  d["index2"] = row["index2"]
@@ -240,21 +261,14 @@ for index,row in df2.iterrows():
                  d["url image"] = url_image
                  d["url"] = product_url
                  d["Artielbezeichnung"] = product_name
+                 d["Preis"] = price
                  l.append(d)
-        #price
+        
 print(l) 
+
 df3 = pandas.DataFrame(l)
 df3.to_csv('Produkt - Level0.csv') 
-#        print(name,url)
-#preis
-#  <div class="product-info--original-price">
-#      pr_info.find()
-#<div class="product-info--price special-price">
-#            Aktionspreis        24,95&nbsp;€</div>
-  
-#        mame.find("a")
-#        name = name["title"]
-        #url
+
         
         
 #        "product-info--price "
@@ -262,6 +276,8 @@ df3.to_csv('Produkt - Level0.csv')
 #-----------------------------------------------------------------------------
 #Product Level 1 - info von der spezifischen Produktseite
 #---------------------------------------------------------------------
+
+
 
 
 #exporting website to txt
