@@ -1,34 +1,10 @@
 ##This programm will read out article numbers from the pluradent webshop
 #
 #
-##import libraries
-#import requests
-#requests.__file__
-#import bs4
-#bs4.__file__
-#from bs4 import BeautifulSoup
-#
-##main function
-#def main(web = 1):
-#    #returns 1, if no error
-#    if web == 1:
-#        print("web1")
-#        url = 'https://shop.pluradent.de/praxisbedarf.html'
-#    else:
-#        print("web0")
-#        url = 'n.a.'
-#    
-#    print(url)
-#    print("Importing web site by using requests.get method")
-#    r = requests.get(url)
-#    return "1"
-#
-#L = main(1)
-#print(L)
 
 
 
-#developing area
+#import libraries
 
 import requests
 requests.__file__
@@ -38,41 +14,51 @@ from bs4 import BeautifulSoup
 import pandas
 import os
 import re
-
+import time;
 #reading website
 #cd "C:/Users/ericb/EED-Solutions by Eric Brahmann/Ideal Dental - Code/webI/"
 
 
+
+
+
+    
+    
 #-----------------------------------------------------------------------------
 #Kategorie Level 0 (right now only info - is not used yet)
 #---------------------------------------------------------------------
-all_main_cat = soup.find_all("a",{"class":"level-top"})
-I = 0
-for item in all_main_cat:
-    I = I +1
-    print (I)
-    label = item.find_all("span",{"class":"label"})
-    try:
-        is_cat = 1
-        cat = label[0].text
-    except:
-        is_cat = 0
-        cat = ''
-    if is_cat == 1:
-        print(cat)
+#all_main_cat = soup.find_all("a",{"class":"level-top"})
+#I = 0
+#for item in all_main_cat:
+#    I = I +1
+#    print (I)
+#    label = item.find_all("span",{"class":"label"})
+#    try:
+#        is_cat = 1
+#        cat = label[0].text
+#    except:
+#        is_cat = 0
+#        cat = ''
+#    if is_cat == 1:
+#        print(cat)
 
-logfile =  'log.txt'       
+logfile =  'log.txt'  
+localtime = time.asctime( time.localtime(time.time()) )     
+
 with open(logfile,'w') as f:
-        f.write('')        
+        f.write('start: ' + localtime)        
 
 cat0 = {'praxisbedarf','laborbedarf'}
-cat0 = {'laborbedarf'}
+#cat0 = {'laborbedarf'}
 for cat in cat0:
     print('-----------------------------------------------------')
     print(cat)
     print('-----------------------------------------------------')
     url = 'https://shop.pluradent.de/'+cat+'.html'
     print (url)
+    with open(logfile,'a') as f:
+        f.write('\n\n' + cat)
+        f.write('\n-------------------------------------\n\n' )
 
 #    url = 'https://shop.pluradent.de/praxisbedarf.html'
     r = requests.get(url)
@@ -92,6 +78,8 @@ for cat in cat0:
     #-----------------------------------------------------------------------------
     #Kategorie Level 1
     #---------------------------------------------------------------------
+    with open(logfile,'a') as f:
+        f.write('\n\n' + 'Kategorie Level 1 wird ausgelesen' + '\n\n' )
     all_subcat = soup.find_all("div",{"class":"category-teasers--wrapper--teaser--content--subcategories mouse-over"})  
     
     l = []
@@ -138,7 +126,8 @@ for cat in cat0:
     #-----------------------------------------------------------------------------
     #Kategorie Level 2
     #---------------------------------------------------------------------
-    
+    with open(logfile,'a') as f:
+        f.write('\n\n' + 'Kategorie Level 2 wird ausgelesen' + '\n\n' ) 
     
     I = 0
     l = []
@@ -183,6 +172,8 @@ for cat in cat0:
     #-----------------------------------------------------------------------------
     #Product Level 0 - infos auf der Übersichtsseite
     #---------------------------------------------------------------------
+    with open(logfile,'a') as f:
+        f.write('\n\n' + 'Produkt Level - 0 wird ausgelesen' + '\n\n' ) 
     print('---------------------------------------------------------------------')
     print('Produkt Level - 0 wird ausgelesen')
     print('---------------------------------------------------------------------')
@@ -317,7 +308,7 @@ for cat in cat0:
                      product_desc = soup5.find("div",{"class":"product-detail-page--main--details--desc"})
                      product_desc = product_desc.find("p").text.strip()
                  except:
-                     product_desc = ''
+                     product_desc = 'n.a.'
                  url_image = soup5.find("div",{"class":"product-detail-page--main--introduction--media"})
                  url_image = url_image.find("img")["src"]
                  d = {}
@@ -338,17 +329,24 @@ for cat in cat0:
                  d["HerstellerNr"] = sku_hersteller
                  d["Beschreibung"] = product_desc
                  l.append(d)
-            except:
-                    err_message = 'I = '
+             except:
+                    err_message = 'I = ' + str(I) + ' \n url = ' + url + '\nFehler beim auslesen'
                     with open(logfile,'a') as f:
-                        f.write('/n' + )  
-    
+                        f.write('/n' + err_message)  
+
     
     #print(l) 
     
     df4 = pandas.DataFrame(l)
     df4.to_csv('Produkt - Level1 - ' + current_cat + '.csv') 
 
+    
+   
+localtime = time.asctime( time.localtime(time.time()) )     
+
+
+with open(logfile,'a') as f:
+        f.write('end: ' + localtime)        
 #exporting website to txt
 #with open('url5.txt','w') as f:
 #    f.write(str(c5))
