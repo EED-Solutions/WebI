@@ -42,24 +42,6 @@ import re
 #reading website
 #cd "C:/Users/ericb/EED-Solutions by Eric Brahmann/Ideal Dental - Code/webI/"
 
-url = 'https://shop.pluradent.de/praxisbedarf.html'
-r = requests.get(url)
-c = r.content
-soup = BeautifulSoup(c,"html.parser")
-
-
-#exporting website to txt
-with open('url.txt','w') as f:
-    f.write(str(c))
-
-with open('url_soup.txt','w') as f:
-    f.write(str(soup))
-
-
-
-
-
-
 
 #-----------------------------------------------------------------------------
 #Kategorie Level 0 (right now only info - is not used yet)
@@ -79,49 +61,77 @@ for item in all_main_cat:
     if is_cat == 1:
         print(cat)
         
-#-----------------------------------------------------------------------------
-#Kategorie Level 1
-#---------------------------------------------------------------------
-all_subcat = soup.find_all("div",{"class":"category-teasers--wrapper--teaser--content--subcategories mouse-over"})  
+        
 
-l = []
-l2 = []
-I = 0
-for item in all_subcat:
-    I = I +1
-    print(I,item.text)
-    print(item)
-    sublinks = item.find_all("a")
-    J = 0
-    for  link in sublinks:
-        if I >= 1:
-            d={}
-            J = J +1
-            print (J)
-            has_link = link.has_attr('href')
-            print('Hat link',has_link)
-            if link.has_attr('href'):
-                print (link.text,link['href'])
-                d["index"] = I
-                d["index2"] = J
-                d["url"] = link['href']
-                d["Kategorie - Level0"] = "Praxisbedarf"
-                d["Kategorie - Level1"] = link.text
-                d["Kategorie - Level2"] = ""
-                
-                l.append(d)
-        elif I == 0:
-            print('')
-#            d2 = {}
-#            d2["index"] = I
-#            d2["index2"] = J
-#            d2["Kategorie"] = link.text 
-#            d2["url"] = ""
-#            l2.append(d)
-#exporting            
-df1 = pandas.DataFrame(l)
-df1.to_csv('Kategorie - Level1.csv') 
+cat0 = {'praxisbedarf','laborbedarf'}
+cat0 = {'laborbedarf'}
+for cat in cat0:
+    print('-----------------------------------------------------')
+    print(cat)
+    print('-----------------------------------------------------')
+    url = 'https://shop.pluradent.de/'+cat+'.html'
+    print (url)
 
+#    url = 'https://shop.pluradent.de/praxisbedarf.html'
+    r = requests.get(url)
+    c = r.content
+    soup = BeautifulSoup(c,"html.parser")
+
+    sttr = 'url_'+ cat +'.txt'
+    print(sttr)
+    #exporting website to txt
+    with open('url_'+cat+'.txt','w') as f:
+        f.write(str(c))
+    
+    with open('url_soup_'+cat+'.txt','w') as f:
+        f.write(str(soup))
+    
+    current_cat = cat           
+    #-----------------------------------------------------------------------------
+    #Kategorie Level 1
+    #---------------------------------------------------------------------
+    all_subcat = soup.find_all("div",{"class":"category-teasers--wrapper--teaser--content--subcategories mouse-over"})  
+    
+    l = []
+    l2 = []
+    I = 0
+    for item in all_subcat:
+        I = I +1
+        print(I,item.text)
+        print(item)
+        sublinks = item.find_all("a")
+        J = 0
+        for  link in sublinks:
+            if I >= 1:
+                d={}
+                J = J +1
+                print (J)
+                has_link = link.has_attr('href')
+                print('Hat link',has_link)
+                if link.has_attr('href'):
+                    print (link.text,link['href'])
+                    d["index"] = I
+                    d["index2"] = J
+                    d["url"] = link['href']
+                    d["Kategorie - Level0"] = current_cat
+                    d["Kategorie - Level1"] = link.text
+                    d["Kategorie - Level2"] = ""
+                    
+                    l.append(d)
+            elif I == 0:
+                print('')
+    #            d2 = {}
+    #            d2["index"] = I
+    #            d2["index2"] = J
+    #            d2["Kategorie"] = link.text 
+    #            d2["url"] = ""
+    #            l2.append(d)
+    #exporting            
+    df1 = pandas.DataFrame(l)
+    df1.to_csv('Kategorie - Level1 - ' + cat +'.csv') 
+
+    #labormaterial - kleingeräte labor / ersatzeile labor werden nicht ausgelesen
+    #praxismaterial https://shop.pluradent.de/praxisbedarf/ersatzteile-praxis.html
 #-----------------------------------------------------------------------------
 #Kategorie Level 2
 #---------------------------------------------------------------------
@@ -163,7 +173,7 @@ for index,row in df1.iterrows():
                 l.append(d)
 #print(l)
 df2 = pandas.DataFrame(l)
-df2.to_csv('Kategorie - Level2.csv') 
+df2.to_csv('Kategorie - Level2 - ' + current_cat + '.csv') 
 
 #df2 = pandas.read_csv('Kategorie - Level2.csv', index_col=0, parse_dates=True)
 #df2 = pandas.read_csv('Kategorie - Level2.csv',index_col=0)
