@@ -16,8 +16,10 @@ import os
 import re
 import time
 import math
+import socket
 #reading website
 #cd "C:/Users/ericb/EED-Solutions by Eric Brahmann/Ideal Dental - Code/webI/"
+
 
 
 
@@ -43,15 +45,19 @@ import math
 #    if is_cat == 1:
 #        print(cat)
 
+#Initialisierung
+
 logfile =  'log.txt'  
-localtime = time.asctime( time.localtime(time.time()) )     
+localtime = time.asctime( time.localtime(time.time()) )
+ip_address = socket.gethostbyname(socket.gethostname())     
 
 with open(logfile,'w') as f:
-        f.write('start: ' + localtime)     
+        f.write('start: ' + localtime)
+        f.write('\nip: ' + ip_address)   
 
 
-#cat0 = {'praxisbedarf','laborbedarf'}
-cat0 = {'laborbedarf'}
+cat0 = {'praxisbedarf','laborbedarf'}
+#cat0 = {'laborbedarf'}
 for cat in cat0:
     print('-----------------------------------------------------')
     print(cat)
@@ -166,6 +172,40 @@ for cat in cat0:
                     d["url"] = item["href"]
                     l.append(d)
     #print(l)
+    if current_cat == 'laborbedarf':
+        print('a')
+        d = {}
+        J = J +1
+        d["index"] = ''
+        d["index2"] = ''
+        d["index3"] = J
+        d["Kategorie - Level0"] = current_cat
+        d["Kategorie - Level1"] = ''
+        d["Kategorie - Level2"] = 'Kleingeräte Labor'
+        d["url"] = 'https://shop.pluradent.de/laborbedarf/kleingeraete-labor.html'
+        l.append(d)
+        d = {}
+        J = J +1
+        d["index"] = ''
+        d["index2"] = ''
+        d["index3"] = J
+        d["Kategorie - Level0"] = current_cat
+        d["Kategorie - Level1"] = ''
+        d["Kategorie - Level2"] = 'Ersatzteile Labor'
+        d["url"] = 'https://shop.pluradent.de/laborbedarf/ersatzteile-labor.html'
+        l.append(d)
+    elif current_cat == 'praxisbedarf':
+        d = {}
+        J = J +1
+        d["index"] = ''
+        d["index2"] = ''
+        d["index3"] = J
+        d["Kategorie - Level0"] = current_cat
+        d["Kategorie - Level1"] = ''
+        d["Kategorie - Level2"] = 'Ersatzteile Praxis'
+        d["url"] = 'https://shop.pluradent.de/praxisbedarf/ersatzteile-praxis.html'
+        l.append(d)
+    
     df2 = pandas.DataFrame(l)
     df2.to_csv('Kategorie - Level2 - ' + current_cat + '.csv') 
 
@@ -182,10 +222,11 @@ for cat in cat0:
     I = 0
     J = 0
     K = 0
+    overall_pos = 0
     l = []
     for index,row in df2.iterrows():
          I = I+1
-         if row["Kategorie - Level1"] != row["Kategorie - Level2"] and (I == 2 or I == 25 or I == 16):
+         if row["Kategorie - Level1"] != row["Kategorie - Level2"]:
              print ("I=",I,"/", row["Kategorie - Level1"],"/",row["Kategorie - Level2"])
              print (row["url"])
              url = row["url"]
@@ -198,17 +239,20 @@ for cat in cat0:
              soup3 = BeautifulSoup(c3,"html.parser")
     
              #count pages
-             pages = soup3.find_all("div",{"class":"pages"})
-             pages2 = pages[0].find_all("a")
-             K = 0
-             pagecount = 0
-             for page in pages2:
-                 K= K+1
-                 if page.text.isdigit():
-                     pagecount = max(int(page.text),pagecount)
+             try:
+                 pages = soup3.find_all("div",{"class":"pages"})
+                 pages2 = pages[0].find_all("a")
+                 K = 0
+                 pagecount = 0
+                 for page in pages2:
+                     K= K+1
+                     if page.text.isdigit():
+                         pagecount = max(int(page.text),pagecount)
+             except:
+                 pagecount = 1
+             
              print ("pagecount=", pagecount)
-             with open(logfile,'a') as f:
-                  f.write('\n\t\tpagecount= ' + str(pagecount))
+                 
               #Elements per page
              elements = soup3.find("div",{"class":"limiter"})
              elements = elements.find_all("option")
@@ -218,25 +262,36 @@ for cat in cat0:
                 if d_item.has_attr('selected'):
                     elements = int(d_item.text)
                     print(elements,"elements per page")
-                         
-             with open(logfile,'a') as f:
-                  f.write('\n\t\telements= ' + str(elements))
+            
+                 
+                 
+
              #anzahl positionen
-#             *TEST*
-#             url = 'https://shop.pluradent.de/laborbedarf/labormaterial/modellherstellung/gipse.html'
-#             r3 = requests.get(url)
-#             c3 = r3.content
-#             soup3 = BeautifulSoup(c3,"html.parser")
-#             *TEST*
              positions = soup3.find("div",{"class":"amount"})
              positions = positions.text.replace('\n','').strip()
-             m = re.search('(\d+)\sPos', positions)
-             positions = int(m.group(1))
-             with open(logfile,'a') as f:
-                  f.write('\n\t\tpositions= ' + str(positions))
+             try:
+                 m = re.search('(\d+)\sPos', positions)
+                 positions = int(m.group(1))
+             except:
+                m = re.search('(\d+)\s', positions)
+                positions = int(m.group(1))
+             overall_pos = overall_pos + positions                
              pagecount2 = math.ceil(positions/elements)
-             with open(logfile,'a') as f:
-                  f.write('\n\t\tpagecount2= ' + str(pagecount2))
+             try:            
+                 with open(logfile,'a') as f:
+                      f.write('\n\t\tpagecount= ' + str(pagecount))
+                      f.write('\n\t\telements= ' + str(elements))
+                      f.write('\n\t\tpositions= ' + str(positions))
+                      f.write('\n\t\tpagecount2= ' + str(pagecount2))
+             except:
+                 time.sleep(2)
+                 with open(logfile,'a') as f:
+                      f.write('\n\t\tpagecount= ' + str(pagecount))
+                      f.write('\n\t\telements= ' + str(elements))
+                      f.write('\n\t\tpositions= ' + str(positions))
+                      f.write('\n\t\tpagecount2= ' + str(pagecount2))
+            
+                  
              
              #iterate
     #        for J in range(1,pagecount+1):
@@ -298,6 +353,8 @@ for cat in cat0:
     df3 = pandas.DataFrame(l)
     df3.to_csv('Produkt - Level0 - ' + current_cat + '.csv') 
 
+    with open(logfile,'a') as f:
+        f.write('\n\toverall - positions= ' + str(overall_pos))
     
         
     #        "product-info--price "
