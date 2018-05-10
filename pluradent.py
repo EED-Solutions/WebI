@@ -14,7 +14,8 @@ from bs4 import BeautifulSoup
 import pandas
 import os
 import re
-import time;
+import time
+import math
 #reading website
 #cd "C:/Users/ericb/EED-Solutions by Eric Brahmann/Ideal Dental - Code/webI/"
 
@@ -46,10 +47,11 @@ logfile =  'log.txt'
 localtime = time.asctime( time.localtime(time.time()) )     
 
 with open(logfile,'w') as f:
-        f.write('start: ' + localtime)        
+        f.write('start: ' + localtime)     
 
-cat0 = {'praxisbedarf','laborbedarf'}
-#cat0 = {'laborbedarf'}
+
+#cat0 = {'praxisbedarf','laborbedarf'}
+cat0 = {'laborbedarf'}
 for cat in cat0:
     print('-----------------------------------------------------')
     print(cat)
@@ -187,7 +189,9 @@ for cat in cat0:
              print ("I=",I,"/", row["Kategorie - Level1"],"/",row["Kategorie - Level2"])
              print (row["url"])
              url = row["url"]
-    
+             with open(logfile,'a') as f:
+                 f.write('\n\t' + row["Kategorie - Level1"] + ' / ' + row["Kategorie - Level2"] + ' / '  + row["url"]) 
+            
     #url = 'https://shop.pluradent.de/praxisbedarf/pluline-qualitaetsprodukte/praxismaterial/abformung.html'
              r3 = requests.get(url)
              c3 = r3.content
@@ -203,7 +207,8 @@ for cat in cat0:
                  if page.text.isdigit():
                      pagecount = max(int(page.text),pagecount)
              print ("pagecount=", pagecount)
-             
+             with open(logfile,'a') as f:
+                  f.write('\n\t\tpagecount= ' + str(pagecount))
               #Elements per page
              elements = soup3.find("div",{"class":"limiter"})
              elements = elements.find_all("option")
@@ -213,9 +218,29 @@ for cat in cat0:
                 if d_item.has_attr('selected'):
                     elements = int(d_item.text)
                     print(elements,"elements per page")
-    
+                         
+             with open(logfile,'a') as f:
+                  f.write('\n\t\telements= ' + str(elements))
+             #anzahl positionen
+#             *TEST*
+#             url = 'https://shop.pluradent.de/laborbedarf/labormaterial/modellherstellung/gipse.html'
+#             r3 = requests.get(url)
+#             c3 = r3.content
+#             soup3 = BeautifulSoup(c3,"html.parser")
+#             *TEST*
+             positions = soup3.find("div",{"class":"amount"})
+             positions = positions.text.replace('\n','').strip()
+             m = re.search('(\d+)\sPos', positions)
+             positions = int(m.group(1))
+             with open(logfile,'a') as f:
+                  f.write('\n\t\tpositions= ' + str(positions))
+             pagecount2 = math.ceil(positions/elements)
+             with open(logfile,'a') as f:
+                  f.write('\n\t\tpagecount2= ' + str(pagecount2))
+             
              #iterate
-    #         for I in range(1,pagecount+1):
+    #        for J in range(1,pagecount+1):
+        #    for J in range(1,pagecount2+1):
              for J in range(1,2):
                  
                  url_page = url+"?p="+str(J)
@@ -273,14 +298,15 @@ for cat in cat0:
     df3 = pandas.DataFrame(l)
     df3.to_csv('Produkt - Level0 - ' + current_cat + '.csv') 
 
-    with open(logfile,'a') as f:
-        f.write('\n\n' + 'Produkt Level - 1 wird ausgelesen' + '\n\n' )  
+    
         
     #        "product-info--price "
         
     #-----------------------------------------------------------------------------
     #Product Level 1 - info von der spezifischen Produktseite
     #---------------------------------------------------------------------
+    with open(logfile,'a') as f:
+        f.write('\n\n' + 'Produkt Level - 1 wird ausgelesen' + '\n\n' )  
     print('---------------------------------------------------------------------')
     print('Produkt Level - 1 wird ausgelesen')
     print('---------------------------------------------------------------------')
