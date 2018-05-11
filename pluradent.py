@@ -51,6 +51,8 @@ logfile =  'log.txt'
 localtime = time.asctime( time.localtime(time.time()) )
 ip_address = socket.gethostbyname(socket.gethostname())     
 
+cr = 0 #count_requests
+
 with open(logfile,'w') as f:
         f.write('start: ' + localtime)
         f.write('\nip: ' + ip_address)   
@@ -295,9 +297,9 @@ for cat in cat0:
              
              #iterate
     #        for J in range(1,pagecount+1):
-        #    for J in range(1,pagecount2+1):
-             for J in range(1,2):
-                 
+             for J in range(1,pagecount2+1):
+#             for J in range(1,2):
+                  
                  url_page = url+"?p="+str(J)
                  print(url_page)
     
@@ -355,6 +357,7 @@ for cat in cat0:
 
     with open(logfile,'a') as f:
         f.write('\n\toverall - positions= ' + str(overall_pos))
+        f.write ('\n'+time.asctime( time.localtime(time.time()) ))
     
         
     #        "product-info--price "
