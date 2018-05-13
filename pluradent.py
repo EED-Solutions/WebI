@@ -70,8 +70,9 @@ df1='';df2='';df3 = '';df4='';df5=''
 sheet_out = "Tabelle1"
 
 #Steuervariablen
+request_cat2 = 0 #1:= requests url in order do read Category level 2 / 0:= imports excel file instead
 request_prod0 = 1 #1:= requests url in order do read Product level 0 / 0:= imports excel file instead
-request_cat2 = 1 #1:= requests url in order do read Category level 2 / 0:= imports excel file instead
+
  
 #-------------------------------------------------
 #0) Start
@@ -168,7 +169,7 @@ for cat in cat0:
     l = []
     if request_cat2 == 0:
         print("\n\timport dataframe from excel")
-        df3 = pandas.read_excel(file+'.xlsx',sheet_name = sheet_out)
+        df2 = pandas.read_excel(file+'.xlsx',sheet_name = sheet_out)
         with open(logfile,'a') as f:
             f.write('\n\t' + sheet_out + ' aus ' + file + ' gelesen' )
     elif request_cat2 == 1:
@@ -203,42 +204,42 @@ for cat in cat0:
                         d["Kategorie - Level2"] = item.text.strip()
                         d["url"] = item["href"]
                         l.append(d)
-        #print(l)
-        if current_cat == 'laborbedarf':
-            print('a')
-            d = {}
-            J = J +1
-            d["index"] = ''
-            d["index2"] = ''
-            d["index3"] = J
-            d["Kategorie - Level0"] = current_cat
-            d["Kategorie - Level1"] = ''
-            d["Kategorie - Level2"] = 'Kleingeräte Labor'
-            d["url"] = 'https://shop.pluradent.de/laborbedarf/kleingeraete-labor.html'
-            l.append(d)
-            d = {}
-            J = J +1
-            d["index"] = ''
-            d["index2"] = ''
-            d["index3"] = J
-            d["Kategorie - Level0"] = current_cat
-            d["Kategorie - Level1"] = ''
-            d["Kategorie - Level2"] = 'Ersatzteile Labor'
-            d["url"] = 'https://shop.pluradent.de/laborbedarf/ersatzteile-labor.html'
-            l.append(d)
-        elif current_cat == 'praxisbedarf':
-            d = {}
-            J = J +1
-            d["index"] = ''
-            d["index2"] = ''
-            d["index3"] = J
-            d["Kategorie - Level0"] = current_cat
-            d["Kategorie - Level1"] = ''
-            d["Kategorie - Level2"] = 'Ersatzteile Praxis'
-            d["url"] = 'https://shop.pluradent.de/praxisbedarf/ersatzteile-praxis.html'
-            l.append(d)
-        
-        df2 = pandas.DataFrame(l)
+       
+             if current_cat == 'laborbedarf':
+                print('a')
+                d = {}
+                J = J +1
+                d["index"] = ''
+                d["index2"] = ''
+                d["index3"] = J
+                d["Kategorie - Level0"] = current_cat
+                d["Kategorie - Level1"] = ''
+                d["Kategorie - Level2"] = 'Kleingeräte Labor'
+                d["url"] = 'https://shop.pluradent.de/laborbedarf/kleingeraete-labor.html'
+                l.append(d)
+                d = {}
+                J = J +1
+                d["index"] = ''
+                d["index2"] = ''
+                d["index3"] = J
+                d["Kategorie - Level0"] = current_cat
+                d["Kategorie - Level1"] = ''
+                d["Kategorie - Level2"] = 'Ersatzteile Labor'
+                d["url"] = 'https://shop.pluradent.de/laborbedarf/ersatzteile-labor.html'
+                l.append(d)
+             elif current_cat == 'praxisbedarf':
+                d = {}
+                J = J +1
+                d["index"] = ''
+                d["index2"] = ''
+                d["index3"] = J
+                d["Kategorie - Level0"] = current_cat
+                d["Kategorie - Level1"] = ''
+                d["Kategorie - Level2"] = 'Ersatzteile Praxis'
+                d["url"] = 'https://shop.pluradent.de/praxisbedarf/ersatzteile-praxis.html'
+                l.append(d)
+            
+             df2 = pandas.DataFrame(l)
         df2.to_csv( file + '.csv') 
         df2.to_excel(file+ '.xlsx',sheet_name = sheet_out)
         
@@ -263,7 +264,7 @@ for cat in cat0:
     l = [];l2=[]
     if request_prod0 == 0:
         print("\n\timport dataframe from excel")
-        df3 = pandas.read_excel(file,sheet_name = sheet_out)
+        df3 = pandas.read_excel(file + '.xlsx',sheet_name = sheet_out)
         with open(logfile,'a') as f:
             f.write('\n\t' + sheet_out + ' aus ' + file + ' gelesen' )
     elif request_prod0 == 1:
@@ -405,14 +406,14 @@ for cat in cat0:
                      
             
 #    print(l) 
-    if 0 < len(l2) < 1000:
-         df5 = pandas.DataFrame(l2)
-         df5.set_index('ArtikelNr')
-         file2 = file + '_' + str(len(l))
-         df5.to_excel(file2+'.xlsx',sheet_name = sheet_out)
-         l2 = []
-
-    df3 = pandas.DataFrame(l)
+        if 0 < len(l2) < 1000:
+             df5 = pandas.DataFrame(l2)
+             df5.set_index('ArtikelNr')
+             file2 = file + '_' + str(len(l))
+             df5.to_excel(file2+'.xlsx',sheet_name = sheet_out)
+             l2 = []
+    
+        df3 = pandas.DataFrame(l)
     df3.to_csv( file + '.csv') 
     df3.to_excel(file+ '.xlsx',sheet_name = sheet_out)
 
