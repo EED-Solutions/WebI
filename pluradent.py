@@ -20,8 +20,14 @@ import re
 import time
 import math
 import socket
+
+#import classes
+
+from pandas import ExcelWriter
+
 #reading website
 #cd "C:/Users/ericb/EED-Solutions by Eric Brahmann/Ideal Dental - Code/webI/"
+
 
 
     
@@ -61,9 +67,11 @@ cr = 0 #count_requests
         #dataframes
 df1='';df2='';df3 = '';df4='';df5=''
 
-outxls = 'pluradent.xlsx'
+sheet_out = "Tabelle1"
 
-
+#Steuervariablen
+request_prod0 = 1 #1:= requests url in order do read Product level 0 / 0:= imports excel file instead
+request_cat2 = 1 #1:= requests url in order do read Category level 2 / 0:= imports excel file instead
  
 #-------------------------------------------------
 #0) Start
@@ -99,7 +107,9 @@ for cat in cat0:
     #-----------------------------------------------------------------------------
     #Kategorie Level 1
     #---------------------------------------------------------------------
-    cat_label = 'Kategorie Level 1'
+    cat_label = 'Kategorie_1'
+    file = cat_label + '_'  + current_cat
+    
     with open(logfile,'a') as f:
         f.write('\n\n' + cat_label + ' wird ausgelesen' + '\n\n' )
     all_subcat = soup.find_all("div",{"class":"category-teasers--wrapper--teaser--content--subcategories mouse-over"})  
@@ -135,12 +145,11 @@ for cat in cat0:
 
                 
     df1 = pandas.DataFrame(l)
-    sheet = cat_label + ' - '  + current_cat
-    df1.to_csv( sheet + '.csv') 
-    
-    df1.to_excel(outxls,sheet_name = sheet)
-    if not df1:
-        df1 = pandas.read_excel(outxls,sheet_name = cat_label)
+    df1.to_csv( file + '.csv') 
+    df1.to_excel(file +'.xlsx' ,sheet_name = sheet_out)
+#    writer = ExcelWriter(outxls)
+#    df1.to_excel(writer,sheet)
+#    writer.save()
     
 
 
@@ -148,91 +157,99 @@ for cat in cat0:
     #-----------------------------------------------------------------------------
     #Kategorie Level 2
     #---------------------------------------------------------------------
-    cat_label = 'Kategorie Level 2'
+    
+    cat_label = 'Kategorie_2'
+    file = cat_label + '_'  + current_cat
+    
     with open(logfile,'a') as f:
         f.write('\n\n' + cat_label + ' wird ausgelesen' + '\n\n' )
     
     I = 0
     l = []
-    
-    for index,row in df1.iterrows():
-         I = I+1
-         
-         if I != 0:
-             print ("I=",I," / ", row["Kategorie - Level1"])
-             print (row["url"])
-             url = row["url"]
-             r2 = requests.get(url);cr = cr+1
-             c2 = r2.content
-             soup2 = BeautifulSoup(c2,"html.parser")
-    #url = 'https://shop.pluradent.de/praxisbedarf/praxisinstrumente/instrumente-konservierend.html'         
-    #r2 = requests.get(url)
-    #c2 = r2.content
-    #soup2 = BeautifulSoup(c2,"html.parser")
-             url_nohtml = os.path.splitext(url)[0]
-             all_subcat2_name = soup2.find_all("a",{"class":"category-subnav--content--list--entry--link"})
-             K = 0
-             J = 0
-             for item in all_subcat2_name:
-                K = K+1
-                if item["href"].find(url_nohtml) == 0:
-                    d = {}
-                    J = J +1
-                    d["index"] = row["index"]
-                    d["index2"] = row["index2"]
-                    d["index3"] = J
-                    d["Kategorie - Level0"] = row["Kategorie - Level0"]
-                    d["Kategorie - Level1"] = row["Kategorie - Level1"]
-                    d["Kategorie - Level2"] = item.text.strip()
-                    d["url"] = item["href"]
-                    l.append(d)
-    #print(l)
-    if current_cat == 'laborbedarf':
-        print('a')
-        d = {}
-        J = J +1
-        d["index"] = ''
-        d["index2"] = ''
-        d["index3"] = J
-        d["Kategorie - Level0"] = current_cat
-        d["Kategorie - Level1"] = ''
-        d["Kategorie - Level2"] = 'Kleingeräte Labor'
-        d["url"] = 'https://shop.pluradent.de/laborbedarf/kleingeraete-labor.html'
-        l.append(d)
-        d = {}
-        J = J +1
-        d["index"] = ''
-        d["index2"] = ''
-        d["index3"] = J
-        d["Kategorie - Level0"] = current_cat
-        d["Kategorie - Level1"] = ''
-        d["Kategorie - Level2"] = 'Ersatzteile Labor'
-        d["url"] = 'https://shop.pluradent.de/laborbedarf/ersatzteile-labor.html'
-        l.append(d)
-    elif current_cat == 'praxisbedarf':
-        d = {}
-        J = J +1
-        d["index"] = ''
-        d["index2"] = ''
-        d["index3"] = J
-        d["Kategorie - Level0"] = current_cat
-        d["Kategorie - Level1"] = ''
-        d["Kategorie - Level2"] = 'Ersatzteile Praxis'
-        d["url"] = 'https://shop.pluradent.de/praxisbedarf/ersatzteile-praxis.html'
-        l.append(d)
-    
-    df2 = pandas.DataFrame(l)
-    sheet = cat_label + ' - '  + current_cat
-    df2.to_csv( sheet + '.csv') 
-    df2.to_excel(outxls,sheet_name = sheet)
-    if not df2:
-        df2 = pandas.read_excel(outxls,sheet_name = cat_label)
+    if request_cat2 == 0:
+        print("\n\timport dataframe from excel")
+        df3 = pandas.read_excel(file+'.xlsx',sheet_name = sheet_out)
+        with open(logfile,'a') as f:
+            f.write('\n\t' + sheet_out + ' aus ' + file + ' gelesen' )
+    elif request_cat2 == 1:
+        for index,row in df1.iterrows():
+             I = I+1
+             
+             if I != 0:
+                 print ("I=",I," / ", row["Kategorie - Level1"])
+                 print (row["url"])
+                 url = row["url"]
+                 r2 = requests.get(url);cr = cr+1
+                 c2 = r2.content
+                 soup2 = BeautifulSoup(c2,"html.parser")
+        #url = 'https://shop.pluradent.de/praxisbedarf/praxisinstrumente/instrumente-konservierend.html'         
+        #r2 = requests.get(url)
+        #c2 = r2.content
+        #soup2 = BeautifulSoup(c2,"html.parser")
+                 url_nohtml = os.path.splitext(url)[0]
+                 all_subcat2_name = soup2.find_all("a",{"class":"category-subnav--content--list--entry--link"})
+                 K = 0
+                 J = 0
+                 for item in all_subcat2_name:
+                    K = K+1
+                    if item["href"].find(url_nohtml) == 0:
+                        d = {}
+                        J = J +1
+                        d["index"] = row["index"]
+                        d["index2"] = row["index2"]
+                        d["index3"] = J
+                        d["Kategorie - Level0"] = row["Kategorie - Level0"]
+                        d["Kategorie - Level1"] = row["Kategorie - Level1"]
+                        d["Kategorie - Level2"] = item.text.strip()
+                        d["url"] = item["href"]
+                        l.append(d)
+        #print(l)
+        if current_cat == 'laborbedarf':
+            print('a')
+            d = {}
+            J = J +1
+            d["index"] = ''
+            d["index2"] = ''
+            d["index3"] = J
+            d["Kategorie - Level0"] = current_cat
+            d["Kategorie - Level1"] = ''
+            d["Kategorie - Level2"] = 'Kleingeräte Labor'
+            d["url"] = 'https://shop.pluradent.de/laborbedarf/kleingeraete-labor.html'
+            l.append(d)
+            d = {}
+            J = J +1
+            d["index"] = ''
+            d["index2"] = ''
+            d["index3"] = J
+            d["Kategorie - Level0"] = current_cat
+            d["Kategorie - Level1"] = ''
+            d["Kategorie - Level2"] = 'Ersatzteile Labor'
+            d["url"] = 'https://shop.pluradent.de/laborbedarf/ersatzteile-labor.html'
+            l.append(d)
+        elif current_cat == 'praxisbedarf':
+            d = {}
+            J = J +1
+            d["index"] = ''
+            d["index2"] = ''
+            d["index3"] = J
+            d["Kategorie - Level0"] = current_cat
+            d["Kategorie - Level1"] = ''
+            d["Kategorie - Level2"] = 'Ersatzteile Praxis'
+            d["url"] = 'https://shop.pluradent.de/praxisbedarf/ersatzteile-praxis.html'
+            l.append(d)
+        
+        df2 = pandas.DataFrame(l)
+        df2.to_csv( file + '.csv') 
+        df2.to_excel(file+ '.xlsx',sheet_name = sheet_out)
+        
+
 
 
     #-----------------------------------------------------------------------------
     #Product Level 0 - infos auf der Übersichtsseite
     #---------------------------------------------------------------------
-    cat_label = 'Produkt Level - 0'
+    cat_label = 'Produkt_0'
+    file = cat_label + '_'  + current_cat
     with open(logfile,'a') as f:
         f.write('\n\n' + cat_label + ' wird ausgelesen' + '\n\n' )
     
@@ -243,135 +260,165 @@ for cat in cat0:
     J = 0
     K = 0
     overall_pos = 0
-    l = []
-    for index,row in df2.iterrows():
-         I = I+1
-         if row["Kategorie - Level1"] != row["Kategorie - Level2"]:
-             print ("I=",I,"/", row["Kategorie - Level1"],"/",row["Kategorie - Level2"])
-             print (row["url"])
-             url = row["url"]
-             with open(logfile,'a') as f:
-                 f.write('\n\t' + row["Kategorie - Level1"] + ' / ' + row["Kategorie - Level2"] + ' / '  + row["url"]) 
-            
-    #url = 'https://shop.pluradent.de/praxisbedarf/pluline-qualitaetsprodukte/praxismaterial/abformung.html'
-             r3 = requests.get(url);cr = cr+1
-             c3 = r3.content
-             soup3 = BeautifulSoup(c3,"html.parser")
-    
-             #count pages
-             try:
-                 pages = soup3.find_all("div",{"class":"pages"})
-                 pages2 = pages[0].find_all("a")
+    l = [];l2=[]
+    if request_prod0 == 0:
+        print("\n\timport dataframe from excel")
+        df3 = pandas.read_excel(file,sheet_name = sheet_out)
+        with open(logfile,'a') as f:
+            f.write('\n\t' + sheet_out + ' aus ' + file + ' gelesen' )
+    elif request_prod0 == 1:
+        for index,row in df2.iterrows():
+             I = I+1
+             if row["Kategorie - Level1"] != row["Kategorie - Level2"]:
+                 print ("I=",I,"/", row["Kategorie - Level1"],"/",row["Kategorie - Level2"])
+                 print (row["url"])
+                 url = row["url"]
+                 with open(logfile,'a') as f:
+                     f.write('\n\t' + row["Kategorie - Level1"] + ' / ' + row["Kategorie - Level2"] + ' / '  + row["url"]) 
+                
+        #url = 'https://shop.pluradent.de/praxisbedarf/pluline-qualitaetsprodukte/praxismaterial/abformung.html'
+                 r3 = requests.get(url);cr = cr+1
+                 c3 = r3.content
+                 soup3 = BeautifulSoup(c3,"html.parser")
+        
+                 #count pages
+                 try:
+                     pages = soup3.find_all("div",{"class":"pages"})
+                     pages2 = pages[0].find_all("a")
+                     K = 0
+                     pagecount = 0
+                     for page in pages2:
+                         K= K+1
+                         if page.text.isdigit():
+                             pagecount = max(int(page.text),pagecount)
+                 except:
+                     pagecount = 1
+                 
+                 print ("pagecount=", pagecount)
+                     
+                  #Elements per page
+                 elements = soup3.find("div",{"class":"limiter"})
+                 elements = elements.find_all("option")
                  K = 0
-                 pagecount = 0
-                 for page in pages2:
-                     K= K+1
-                     if page.text.isdigit():
-                         pagecount = max(int(page.text),pagecount)
-             except:
-                 pagecount = 1
-             
-             print ("pagecount=", pagecount)
-                 
-              #Elements per page
-             elements = soup3.find("div",{"class":"limiter"})
-             elements = elements.find_all("option")
-             K = 0
-             for d_item in elements:
-                K = K+1
-                if d_item.has_attr('selected'):
-                    elements = int(d_item.text)
-                    print(elements,"elements per page")
-            
-                 
-                 
-
-             #anzahl positionen
-             positions = soup3.find("div",{"class":"amount"})
-             positions = positions.text.replace('\n','').strip()
-             try:
-                 m = re.search('(\d+)\sPos', positions)
-                 positions = int(m.group(1))
-             except:
-                m = re.search('(\d+)\s', positions)
-                positions = int(m.group(1))
-             overall_pos = overall_pos + positions                
-             pagecount2 = math.ceil(positions/elements)
-             try:            
-                 with open(logfile,'a') as f:
-                      f.write('\n\t\tpagecount= ' + str(pagecount))
-                      f.write('\n\t\telements= ' + str(elements))
-                      f.write('\n\t\tpositions= ' + str(positions))
-                      f.write('\n\t\tpagecount2= ' + str(pagecount2))
-             except:
-                 time.sleep(2)
-                 with open(logfile,'a') as f:
-                      f.write('\n\t\tpagecount= ' + str(pagecount))
-                      f.write('\n\t\telements= ' + str(elements))
-                      f.write('\n\t\tpositions= ' + str(positions))
-                      f.write('\n\t\tpagecount2= ' + str(pagecount2))
-            
-                  
-             
-             #iterate
-    #        for J in range(1,pagecount+1):
-             for J in range(1,pagecount2+1):
-#             for J in range(1,2):
-                  
-                 url_page = url+"?p="+str(J)
-                 print(url_page)
+                 for d_item in elements:
+                    K = K+1
+                    if d_item.has_attr('selected'):
+                        elements = int(d_item.text)
+                        print(elements,"elements per page")
+                
+                     
+                     
     
-    #read artikelnummer / url image / name / preis
-    #url_page = 'https://shop.pluradent.de/praxisbedarf/pluline-qualitaetsprodukte/praxismaterial/abformung.html?p=1'
-                 r4 = requests.get(url_page);cr = cr+1
-                 c4 = r4.content
-                 soup4 = BeautifulSoup(c4,"html.parser")
-                 #lists all products
-                 products = soup4.find_all("div",{"class":"list-product-item"})
-                 L=0
-                 for product in products:
-                     L=L+1
-                     if L > elements:
-                         break
-                     #url to image
-                     image = product.find("div",{"class":"list-product-item--image"})
-                     url_image=image.find("img")["src"]
-                     #artikelnummer
-                     sku = product.find("div",{"class":"product-info--sku"})
-                     m=re.search('\d+',sku.text)
-                     sku = m.group(0)
-                     #name+url
-                     pr_info = product.find("div",{"class":"product-info"})
-                     pr_info_a = pr_info.find("a")
-                     product_name=pr_info_a["title"]
-                     product_url=pr_info_a["href"]
-    
-                    #price - unterelment von pr_info
-                     price = pr_info.find("div",{"class":"product-info--price"})
-                     price = price.text.replace('\n', '').strip()
-                     print(price)
-    #                    <div class="product-info--price ">
-    #                    9,25&nbsp;€</div>
-    
-                     d = {}
-                     d["index"] = row["index"]
-                     d["index2"] = row["index2"]
-                     d["index3"] = row["index3"]
-                     d["index4"] = L
-                     d["Kategorie - Level0"] = row["Kategorie - Level0"]
-                     d["Kategorie - Level1"] = row["Kategorie - Level1"]
-                     d["Kategorie - Level2"] = row["Kategorie - Level2"]
-                     d["ArtikelNr"] = sku
-                     d["url image"] = url_image
-                     d["url"] = product_url
-                     d["Name"] = product_name
-                     d["Preis"] = price
-                     l.append(d)
+                 #anzahl positionen
+                 positions = soup3.find("div",{"class":"amount"})
+                 positions = positions.text.replace('\n','').strip()
+                 try:
+                     m = re.search('(\d+)\sPos', positions)
+                     positions = int(m.group(1))
+                 except:
+                    m = re.search('(\d+)\s', positions)
+                    positions = int(m.group(1))
+                 overall_pos = overall_pos + positions                
+                 pagecount2 = math.ceil(positions/elements)
+                 try:            
+                     with open(logfile,'a') as f:
+                          f.write('\n\t\tpagecount= ' + str(pagecount))
+                          f.write('\n\t\telements= ' + str(elements))
+                          f.write('\n\t\tpositions= ' + str(positions))
+                          f.write('\n\t\tpagecount2= ' + str(pagecount2))
+                 except:
+                     time.sleep(2)
+                     with open(logfile,'a') as f:
+                          f.write('\n\t\tpagecount= ' + str(pagecount))
+                          f.write('\n\t\telements= ' + str(elements))
+                          f.write('\n\t\tpositions= ' + str(positions))
+                          f.write('\n\t\tpagecount2= ' + str(pagecount2))
+                
+                      
+                 
+                 #iterate
+        #        for J in range(1,pagecount+1):
+                 for J in range(1,pagecount2+1):
+    #             for J in range(1,2):
+                      
+                     url_page = url+"?p="+str(J)
+                     print(url_page)
+        
+        #read artikelnummer / url image / name / preis
+        #url_page = 'https://shop.pluradent.de/praxisbedarf/pluline-qualitaetsprodukte/praxismaterial/abformung.html?p=1'
+                     r4 = requests.get(url_page);cr = cr+1
+                     c4 = r4.content
+                     soup4 = BeautifulSoup(c4,"html.parser")
+                     #lists all products
+                     products = soup4.find_all("div",{"class":"list-product-item"})
+                     L=0
+                     for product in products:
+                         L=L+1
+                         if L > elements:
+                             break
+                         #url to image
+                         image = product.find("div",{"class":"list-product-item--image"})
+                         url_image=image.find("img")["src"]
+                         #artikelnummer
+                         sku = product.find("div",{"class":"product-info--sku"})
+                         m=re.search('\d+',sku.text)
+                         sku = m.group(0)
+                         #name+url
+                         pr_info = product.find("div",{"class":"product-info"})
+                         pr_info_a = pr_info.find("a")
+                         product_name=pr_info_a["title"]
+                         product_url=pr_info_a["href"]
+        
+                        #price - unterelment von pr_info
+                         price = pr_info.find("div",{"class":"product-info--price"})
+                         price = price.text.replace('\n', '').strip()
+                         print(price)
+        #                    <div class="product-info--price ">
+        #                    9,25&nbsp;€</div>
+        
+                         d = {}
+                         d["index"] = row["index"]
+                         d["index2"] = row["index2"]
+                         d["index3"] = row["index3"]
+                         d["index4"] = L
+                         d["Kategorie - Level0"] = row["Kategorie - Level0"]
+                         d["Kategorie - Level1"] = row["Kategorie - Level1"]
+                         d["Kategorie - Level2"] = row["Kategorie - Level2"]
+                         d["ArtikelNr"] = sku
+                         d["url image"] = url_image
+                         d["url"] = product_url
+                         d["Name"] = product_name
+                         d["Preis"] = price
+                         l.append(d)
+                         
+                         d2 = {}
+                         d2["ArtikelNr"] = d["ArtikelNr"]
+                         d2["Menge"] = 1
+                         l2.append(d2)
+                         
+                         if len(l2) == 1000:
+                             df5 = pandas.DataFrame(l2)
+                             df5.set_index('ArtikelNr')
+                             file2 = file + '_' + str(len(l))
+                             df5.to_excel(file2+'.xlsx',sheet_name = sheet_out)
+                             l2 = []
+                     
             
 #    print(l) 
-    
+    if 0 < len(l2) < 1000:
+         df5 = pandas.DataFrame(l2)
+         df5.set_index('ArtikelNr')
+         file2 = file + '_' + str(len(l))
+         df5.to_excel(file2+'.xlsx',sheet_name = sheet_out)
+         l2 = []
+
     df3 = pandas.DataFrame(l)
-    df3.to_csv('Produkt - Level0 - ' + current_cat + '.csv') 
+    df3.to_csv( file + '.csv') 
+    df3.to_excel(file+ '.xlsx',sheet_name = sheet_out)
+
+
+#    df3 = pandas.DataFrame(l)
+#    df3.to_csv('Produkt - Level0 - ' + current_cat + '.csv') 
 
     with open(logfile,'a') as f:
         f.write('\n\toverall - positions= ' + str(overall_pos))
