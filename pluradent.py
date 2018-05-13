@@ -240,8 +240,8 @@ for cat in cat0:
                 l.append(d)
             
              df2 = pandas.DataFrame(l)
-        df2.to_csv( file + '.csv') 
-        df2.to_excel(file+ '.xlsx',sheet_name = sheet_out)
+             df2.to_csv( file + '.csv') 
+             df2.to_excel(file+ '.xlsx',sheet_name = sheet_out)
         
 
 
@@ -414,12 +414,10 @@ for cat in cat0:
              l2 = []
     
         df3 = pandas.DataFrame(l)
-    df3.to_csv( file + '.csv') 
-    df3.to_excel(file+ '.xlsx',sheet_name = sheet_out)
+        df3.to_csv( file + '.csv') 
+        df3.to_excel(file+ '.xlsx',sheet_name = sheet_out)
 
 
-#    df3 = pandas.DataFrame(l)
-#    df3.to_csv('Produkt - Level0 - ' + current_cat + '.csv') 
 
     with open(logfile,'a') as f:
         f.write('\n\toverall - positions= ' + str(overall_pos))
