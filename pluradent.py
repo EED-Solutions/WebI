@@ -4,6 +4,9 @@
 
 
 
+
+
+
 #import libraries
 
 import requests
@@ -21,11 +24,6 @@ import socket
 #cd "C:/Users/ericb/EED-Solutions by Eric Brahmann/Ideal Dental - Code/webI/"
 
 
-
-
-
-
-    
     
 #-----------------------------------------------------------------------------
 #Kategorie Level 0 (right now only info - is not used yet)
@@ -45,18 +43,31 @@ import socket
 #    if is_cat == 1:
 #        print(cat)
 
-#Initialisierung
 
+#-------------------------------------------------
+#0) Initialisierung
+#------------------------------------------------
+    #Log
 logfile =  'log.txt'  
 localtime = time.asctime( time.localtime(time.time()) )
 ip_address = socket.gethostbyname(socket.gethostname())     
-
-cr = 0 #count_requests
-
 with open(logfile,'w') as f:
         f.write('start: ' + localtime)
-        f.write('\nip: ' + ip_address)   
+        f.write('\nip: ' + ip_address)  
 
+
+    #Variables
+cr = 0 #count_requests
+        #dataframes
+df1='';df2='';df3 = '';df4='';df5=''
+
+outxls = 'pluradent.xlsx'
+
+
+ 
+#-------------------------------------------------
+#0) Start
+#------------------------------------------------
 
 cat0 = {'praxisbedarf','laborbedarf'}
 #cat0 = {'laborbedarf'}
@@ -71,7 +82,7 @@ for cat in cat0:
         f.write('\n-------------------------------------\n\n' )
 
 #    url = 'https://shop.pluradent.de/praxisbedarf.html'
-    r = requests.get(url)
+    r = requests.get(url);cr = cr+1
     c = r.content
     soup = BeautifulSoup(c,"html.parser")
 
@@ -88,8 +99,9 @@ for cat in cat0:
     #-----------------------------------------------------------------------------
     #Kategorie Level 1
     #---------------------------------------------------------------------
+    cat_label = 'Kategorie Level 1'
     with open(logfile,'a') as f:
-        f.write('\n\n' + 'Kategorie Level 1 wird ausgelesen' + '\n\n' )
+        f.write('\n\n' + cat_label + ' wird ausgelesen' + '\n\n' )
     all_subcat = soup.find_all("div",{"class":"category-teasers--wrapper--teaser--content--subcategories mouse-over"})  
     
     l = []
@@ -120,24 +132,25 @@ for cat in cat0:
                     l.append(d)
             elif I == 0:
                 print('')
-    #            d2 = {}
-    #            d2["index"] = I
-    #            d2["index2"] = J
-    #            d2["Kategorie"] = link.text 
-    #            d2["url"] = ""
-    #            l2.append(d)
-    #exporting            
-    df1 = pandas.DataFrame(l)
-    df1.to_csv('Kategorie - Level1 - ' + cat +'.csv') 
 
-    #labormaterial - kleingeräte labor / ersatzeile labor werden nicht ausgelesen
-    #praxismaterial https://shop.pluradent.de/praxisbedarf/ersatzteile-praxis.html
+                
+    df1 = pandas.DataFrame(l)
+    sheet = cat_label + ' - '  + current_cat
+    df1.to_csv( sheet + '.csv') 
+    
+    df1.to_excel(outxls,sheet_name = sheet)
+    if not df1:
+        df1 = pandas.read_excel(outxls,sheet_name = cat_label)
+    
+
+
     
     #-----------------------------------------------------------------------------
     #Kategorie Level 2
     #---------------------------------------------------------------------
+    cat_label = 'Kategorie Level 2'
     with open(logfile,'a') as f:
-        f.write('\n\n' + 'Kategorie Level 2 wird ausgelesen' + '\n\n' ) 
+        f.write('\n\n' + cat_label + ' wird ausgelesen' + '\n\n' )
     
     I = 0
     l = []
@@ -149,7 +162,7 @@ for cat in cat0:
              print ("I=",I," / ", row["Kategorie - Level1"])
              print (row["url"])
              url = row["url"]
-             r2 = requests.get(url)
+             r2 = requests.get(url);cr = cr+1
              c2 = r2.content
              soup2 = BeautifulSoup(c2,"html.parser")
     #url = 'https://shop.pluradent.de/praxisbedarf/praxisinstrumente/instrumente-konservierend.html'         
@@ -209,15 +222,20 @@ for cat in cat0:
         l.append(d)
     
     df2 = pandas.DataFrame(l)
-    df2.to_csv('Kategorie - Level2 - ' + current_cat + '.csv') 
-
+    sheet = cat_label + ' - '  + current_cat
+    df2.to_csv( sheet + '.csv') 
+    df2.to_excel(outxls,sheet_name = sheet)
+    if not df2:
+        df2 = pandas.read_excel(outxls,sheet_name = cat_label)
 
 
     #-----------------------------------------------------------------------------
     #Product Level 0 - infos auf der Übersichtsseite
     #---------------------------------------------------------------------
+    cat_label = 'Produkt Level - 0'
     with open(logfile,'a') as f:
-        f.write('\n\n' + 'Produkt Level - 0 wird ausgelesen' + '\n\n' ) 
+        f.write('\n\n' + cat_label + ' wird ausgelesen' + '\n\n' )
+    
     print('---------------------------------------------------------------------')
     print('Produkt Level - 0 wird ausgelesen')
     print('---------------------------------------------------------------------')
@@ -236,7 +254,7 @@ for cat in cat0:
                  f.write('\n\t' + row["Kategorie - Level1"] + ' / ' + row["Kategorie - Level2"] + ' / '  + row["url"]) 
             
     #url = 'https://shop.pluradent.de/praxisbedarf/pluline-qualitaetsprodukte/praxismaterial/abformung.html'
-             r3 = requests.get(url)
+             r3 = requests.get(url);cr = cr+1
              c3 = r3.content
              soup3 = BeautifulSoup(c3,"html.parser")
     
@@ -305,7 +323,7 @@ for cat in cat0:
     
     #read artikelnummer / url image / name / preis
     #url_page = 'https://shop.pluradent.de/praxisbedarf/pluline-qualitaetsprodukte/praxismaterial/abformung.html?p=1'
-                 r4 = requests.get(url_page)
+                 r4 = requests.get(url_page);cr = cr+1
                  c4 = r4.content
                  soup4 = BeautifulSoup(c4,"html.parser")
                  #lists all products
@@ -357,7 +375,9 @@ for cat in cat0:
 
     with open(logfile,'a') as f:
         f.write('\n\toverall - positions= ' + str(overall_pos))
+        f.write('\n\t No of url access= ' + str(cr))
         f.write ('\n'+time.asctime( time.localtime(time.time()) ))
+
     
         
     #        "product-info--price "
@@ -365,8 +385,10 @@ for cat in cat0:
     #-----------------------------------------------------------------------------
     #Product Level 1 - info von der spezifischen Produktseite
     #---------------------------------------------------------------------
-    with open(logfile,'a') as f:
-        f.write('\n\n' + 'Produkt Level - 1 wird ausgelesen' + '\n\n' )  
+    cat_label = 'Produkt Level - 1'
+    with open(logfile,'a') as f:        
+        f.write('\n\n' + cat_label + ' wird ausgelesen' + '\n\n' )
+
     print('---------------------------------------------------------------------')
     print('Produkt Level - 1 wird ausgelesen')
     print('---------------------------------------------------------------------')
@@ -374,6 +396,7 @@ for cat in cat0:
     J = 0
     K = 0
     l = []
+    l2=[]
     for index,row in df3.iterrows():
          I = I+1
          if I > 0:
@@ -381,7 +404,7 @@ for cat in cat0:
              print (row["Name"],"/",row["ArtikelNr"])
              print (row["url"])
              url = row["url"]
-             r5 = requests.get(url)
+             r5 = requests.get(url);cr = cr+1
              c5 = r5.content
              soup5 = BeautifulSoup(c5,"html.parser")
              #hersteller
@@ -415,6 +438,13 @@ for cat in cat0:
                  d["HerstellerNr"] = sku_hersteller
                  d["Beschreibung"] = product_desc
                  l.append(d)
+                 l2.append(d)
+#                 alle Tausend artikel als Datei rausschreiben
+                 if I % 1000 == 0:
+                     df5 = pandas.DataFrame(l2)
+                     df5.to_csv('Produkt - Level1 - ' + current_cat + '_' + str(I) + '.csv') 
+                     l2 = []
+
              except:
                     err_message = 'I = ' + str(I) + ' \n url = ' + url + '\nFehler beim auslesen'
                     with open(logfile,'a') as f:
