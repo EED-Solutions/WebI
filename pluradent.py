@@ -271,11 +271,11 @@ for cat in cat0:
         for index,row in df2.iterrows():
              I = I+1
              if row["Kategorie - Level1"] != row["Kategorie - Level2"]:
-                 print ("I=",I,"/", row["Kategorie - Level1"],"/",row["Kategorie - Level2"])
+                 print ("I=",I,"/", str(row["Kategorie - Level1"]),"/",row["Kategorie - Level2"])
                  print (row["url"])
                  url = row["url"]
                  with open(logfile,'a') as f:
-                     f.write('\n\t' + row["Kategorie - Level1"] + ' / ' + row["Kategorie - Level2"] + ' / '  + row["url"]) 
+                     f.write('\n\t' + str(row["Kategorie - Level1"]) + ' / ' + row["Kategorie - Level2"] + ' / '  + row["url"]) 
                 
         #url = 'https://shop.pluradent.de/praxisbedarf/pluline-qualitaetsprodukte/praxismaterial/abformung.html'
                  r3 = requests.get(url);cr = cr+1
