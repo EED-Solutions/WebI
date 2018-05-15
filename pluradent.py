@@ -53,8 +53,11 @@ import socket
 #-------------------------------------------------
 #0) Initialisierung
 #------------------------------------------------
-    #Log
-logfile =  'log.txt'  
+    
+#Log
+outpath = 'C:/Users/ericb/EED-Solutions by Eric Brahmann/Ideal Dental - Code/webI/'
+outpath = "C:/Users/ericb/EED-Solutions by Eric Brahmann/Ideal Dental - Dateien Code/webI/out/"
+logfile =  outpath+'log.txt'  
 localtime = time.asctime( time.localtime(time.time()) )
 ip_address = socket.gethostbyname(socket.gethostname())     
 with open(logfile,'w') as f:
@@ -68,7 +71,6 @@ cr = 0 #count_requests
 df1='';df2='';df3 = '';df4='';df5=''
 
 sheet_out = "Tabelle1"
-outpath = 'C:/Users/ericb/EED-Solutions by Eric Brahmann/Ideal Dental - Code/webI/'
 
 #Steuervariablen
 request_cat2 = 0 #1:= requests url in order do read Category level 2 / 0:= imports excel file instead
