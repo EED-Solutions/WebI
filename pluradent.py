@@ -23,7 +23,7 @@ import socket
 
 #import classes
 
-from pandas import ExcelWriter
+#from pandas import ExcelWriter
 
 #reading website
 #cd "C:/Users/ericb/EED-Solutions by Eric Brahmann/Ideal Dental - Code/webI/"
@@ -68,6 +68,7 @@ cr = 0 #count_requests
 df1='';df2='';df3 = '';df4='';df5=''
 
 sheet_out = "Tabelle1"
+outpath = 'C:/Users/ericb/EED-Solutions by Eric Brahmann/Ideal Dental - Code/webI/'
 
 #Steuervariablen
 request_cat2 = 0 #1:= requests url in order do read Category level 2 / 0:= imports excel file instead
@@ -79,7 +80,7 @@ request_prod0 = 1 #1:= requests url in order do read Product level 0 / 0:= impor
 #------------------------------------------------
 
 cat0 = {'praxisbedarf','laborbedarf'}
-#cat0 = {'laborbedarf'}
+cat0 = {'praxisbedarf'}
 for cat in cat0:
     print('-----------------------------------------------------')
     print(cat)
@@ -147,7 +148,7 @@ for cat in cat0:
                 
     df1 = pandas.DataFrame(l)
     df1.to_csv( file + '.csv') 
-    df1.to_excel(file +'.xlsx' ,sheet_name = sheet_out)
+    df1.to_excel(outpath + file +'.xlsx' ,sheet_name = sheet_out)
 #    writer = ExcelWriter(outxls)
 #    df1.to_excel(writer,sheet)
 #    writer.save()
@@ -169,7 +170,7 @@ for cat in cat0:
     l = []
     if request_cat2 == 0:
         print("\n\timport dataframe from excel")
-        df2 = pandas.read_excel(file+'.xlsx',sheet_name = sheet_out)
+        df2 = pandas.read_excel(outpath +file+'.xlsx',sheet_name = sheet_out)
         with open(logfile,'a') as f:
             f.write('\n\t' + sheet_out + ' aus ' + file + ' gelesen' )
     elif request_cat2 == 1:
@@ -241,7 +242,7 @@ for cat in cat0:
             
              df2 = pandas.DataFrame(l)
              df2.to_csv( file + '.csv') 
-             df2.to_excel(file+ '.xlsx',sheet_name = sheet_out)
+             df2.to_excel(outpath +file+ '.xlsx',sheet_name = sheet_out)
         
 
 
@@ -264,7 +265,7 @@ for cat in cat0:
     l = [];l2=[]
     if request_prod0 == 0:
         print("\n\timport dataframe from excel")
-        df3 = pandas.read_excel(file + '.xlsx',sheet_name = sheet_out)
+        df3 = pandas.read_excel(outpath +file + '.xlsx',sheet_name = sheet_out)
         with open(logfile,'a') as f:
             f.write('\n\t' + sheet_out + ' aus ' + file + ' gelesen' )
     elif request_prod0 == 1:
@@ -401,7 +402,7 @@ for cat in cat0:
                              df5 = pandas.DataFrame(l2)
                              df5.set_index('ArtikelNr')
                              file2 = file + '_' + str(len(l))
-                             df5.to_excel(file2+'.xlsx',sheet_name = sheet_out)
+                             df5.to_excel(outpath +file2+'.xlsx',sheet_name = sheet_out)
                              l2 = []
                      
             
@@ -410,12 +411,12 @@ for cat in cat0:
              df5 = pandas.DataFrame(l2)
              df5.set_index('ArtikelNr')
              file2 = file + '_' + str(len(l))
-             df5.to_excel(file2+'.xlsx',sheet_name = sheet_out)
+             df5.to_excel(outpath +file2+'.xlsx',sheet_name = sheet_out)
              l2 = []
     
         df3 = pandas.DataFrame(l)
         df3.to_csv( file + '.csv') 
-        df3.to_excel(file+ '.xlsx',sheet_name = sheet_out)
+        df3.to_excel(outpath +file+ '.xlsx',sheet_name = sheet_out)
 
 
 
