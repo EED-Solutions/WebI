@@ -74,7 +74,7 @@ sheet_out = "Tabelle1"
 
 #Steuervariablen
 request_cat2 = 0 #1:= requests url in order do read Category level 2 / 0:= imports excel file instead
-request_prod0 = 1 #1:= requests url in order do read Product level 0 / 0:= imports excel file instead
+request_prod0 = 0 #1:= requests url in order do read Product level 0 / 0:= imports excel file instead
 
  
 #-------------------------------------------------
@@ -82,7 +82,8 @@ request_prod0 = 1 #1:= requests url in order do read Product level 0 / 0:= impor
 #------------------------------------------------
 
 cat0 = {'praxisbedarf','laborbedarf'}
-cat0 = {'praxisbedarf'}
+#cat0 = {'praxisbedarf'}
+#cat0 = {'laborbedarf'}
 for cat in cat0:
     print('-----------------------------------------------------')
     print(cat)
@@ -434,21 +435,20 @@ for cat in cat0:
     #-----------------------------------------------------------------------------
     #Product Level 1 - info von der spezifischen Produktseite
     #---------------------------------------------------------------------
-    cat_label = 'Produkt Level - 1'
+    cat_label = 'Produkt_1'
+    file = cat_label + '_'  + current_cat
     with open(logfile,'a') as f:        
         f.write('\n\n' + cat_label + ' wird ausgelesen' + '\n\n' )
 
     print('---------------------------------------------------------------------')
     print('Produkt Level - 1 wird ausgelesen')
     print('---------------------------------------------------------------------')
-    I = 0
-    J = 0
-    K = 0
-    l = []
-    l2=[]
+    I = 0;J = 0;K = 0
+    anz_pl = 0;anz_npl = 0
+    l = [];l2=[]
     for index,row in df3.iterrows():
          I = I+1
-         if I > 0:
+         if I < 1005:
              print ("I=",I,"/", row["Kategorie - Level1"],"/",row["Kategorie - Level2"])
              print (row["Name"],"/",row["ArtikelNr"])
              print (row["url"])
@@ -487,13 +487,23 @@ for cat in cat0:
                  d["HerstellerNr"] = sku_hersteller
                  d["Beschreibung"] = product_desc
                  l.append(d)
-                 l2.append(d)
+                 
+                 d2 = {}
+                 if hersteller.tolower() == 'pluradent':
+                     anz_pl = anz_pl +1
+                 else:
+                     d2["ArtikelNr"] = d["ArtikelNr"]
+                     d2["Menge"] = 1
+                     l2.append(d2)
+                     anz_npl = anz_npl +1
 #                 alle Tausend artikel als Datei rausschreiben
-                 if I % 1000 == 0:
+                 if len(l2) == 1000:
                      df5 = pandas.DataFrame(l2)
+                     df5.set_index('ArtikelNr')
+                     file2 = file + '_' + str(len(l))
                      df5.to_csv('Produkt - Level1 - ' + current_cat + '_' + str(I) + '.csv') 
-                     l2 = []
-
+                     df5.to_excel(outpath +file2+'.xlsx',sheet_name = sheet_out,startcol=1)
+                     l2 = []           
              except:
                     err_message = 'I = ' + str(I) + ' \n url = ' + url + '\nFehler beim auslesen'
                     with open(logfile,'a') as f:
@@ -501,9 +511,16 @@ for cat in cat0:
 
     
     #print(l) 
-    
+    if 0 < len(l2) < 1000:
+         df5 = pandas.DataFrame(l2)
+         df5.set_index('ArtikelNr')
+         file2 = file + '_' + str(len(l))
+         df5.to_csv('Produkt - Level1 - ' + current_cat + '_' + str(I) + '.csv') 
+         df5.to_excel(outpath +file2+'.xlsx',sheet_name = sheet_out,startcol=1)
+         l2 = []          
     df4 = pandas.DataFrame(l)
-    df4.to_csv('Produkt - Level1 - ' + current_cat + '.csv') 
+    df4.to_csv(outpath +file + '.csv') 
+    df4.to_excel(outpath +file+ '.xlsx',sheet_name = sheet_out)
 
     
    
