@@ -21,6 +21,7 @@ import time
 import math
 import socket
 
+
 #import classes
 
 #from pandas import ExcelWriter
@@ -83,7 +84,7 @@ request_prod0 = 0 #1:= requests url in order do read Product level 0 / 0:= impor
 
 cat0 = {'praxisbedarf','laborbedarf'}
 #cat0 = {'praxisbedarf'}
-#cat0 = {'laborbedarf'}
+cat0 = {'laborbedarf'}
 for cat in cat0:
     print('-----------------------------------------------------')
     print(cat)
@@ -403,7 +404,7 @@ for cat in cat0:
                          
                          if len(l2) == 1000:
                              df5 = pandas.DataFrame(l2)
-                             df5.set_index('ArtikelNr')
+                             df5 = df5.set_index('ArtikelNr')
                              file2 = file + '_' + str(len(l))
                              df5.to_excel(outpath +file2+'.xlsx',sheet_name = sheet_out)
                              l2 = []
@@ -412,7 +413,7 @@ for cat in cat0:
 #    print(l) 
         if 0 < len(l2) < 1000:
              df5 = pandas.DataFrame(l2)
-             df5.set_index('ArtikelNr')
+             df5 = df5.set_index('ArtikelNr')
              file2 = file + '_' + str(len(l))
              df5.to_excel(outpath +file2+'.xlsx',sheet_name = sheet_out)
              l2 = []
@@ -444,11 +445,11 @@ for cat in cat0:
     print('Produkt Level - 1 wird ausgelesen')
     print('---------------------------------------------------------------------')
     I = 0;J = 0;K = 0
-    anz_pl = 0;anz_npl = 0
+    anz_pl = 0;anz_npl = 0;na = 0
     l = [];l2=[]
     for index,row in df3.iterrows():
          I = I+1
-         if I < 1005:
+         if I >= 1:
              print ("I=",I,"/", row["Kategorie - Level1"],"/",row["Kategorie - Level2"])
              print (row["Name"],"/",row["ArtikelNr"])
              print (row["url"])
@@ -458,17 +459,26 @@ for cat in cat0:
              soup5 = BeautifulSoup(c5,"html.parser")
              #hersteller
              try:
-                 hersteller = soup5.find("div",{"class":"product-detail-page--main--introduction--info--udxpluradentzzherbz"})
-                 hersteller = hersteller.find("span",{"class":"value"}).text.replace("/n","").strip()
-                 sku_hersteller = soup5.find("div",{"class":"product-detail-page--main--introduction--info--manufacturer_sku"})
-                 sku_hersteller = sku_hersteller.find("span",{"class":"value"}).text.replace("/n","").strip()
+                 try:
+                     hersteller = soup5.find("div",{"class":"product-detail-page--main--introduction--info--udxpluradentzzherbz"})
+                     hersteller = hersteller.find("span",{"class":"value"}).text.replace("/n","").strip()
+                 except:
+                     hersteller = "n.a."
+                 try:
+                     sku_hersteller = soup5.find("div",{"class":"product-detail-page--main--introduction--info--manufacturer_sku"})
+                     sku_hersteller = sku_hersteller.find("span",{"class":"value"}).text.replace("/n","").strip()
+                 except:
+                     sku_hersteller = "n.a."
                  try:
                      product_desc = soup5.find("div",{"class":"product-detail-page--main--details--desc"})
                      product_desc = product_desc.find("p").text.strip()
                  except:
                      product_desc = 'n.a.'
-                 url_image = soup5.find("div",{"class":"product-detail-page--main--introduction--media"})
-                 url_image = url_image.find("img")["src"]
+                 try:
+                     url_image = soup5.find("div",{"class":"product-detail-page--main--introduction--media"})
+                     url_image = url_image.find("img")["src"]
+                 except:
+                     url_image = ""
                  d = {}
                  d["index"] = row["index"]
                  d["index2"] = row["index2"]
@@ -489,34 +499,36 @@ for cat in cat0:
                  l.append(d)
                  
                  d2 = {}
-                 if hersteller.tolower() == 'pluradent':
+                 if hersteller.lower() == 'pluradent':
                      anz_pl = anz_pl +1
+                 elif hersteller == "n.a.":
+                     na = na +1
                  else:
                      d2["ArtikelNr"] = d["ArtikelNr"]
                      d2["Menge"] = 1
                      l2.append(d2)
                      anz_npl = anz_npl +1
-#                 alle Tausend artikel als Datei rausschreiben
+    #                 alle Tausend artikel als Datei rausschreiben
                  if len(l2) == 1000:
                      df5 = pandas.DataFrame(l2)
-                     df5.set_index('ArtikelNr')
+                     df5 = df5.set_index('ArtikelNr')
                      file2 = file + '_' + str(len(l))
                      df5.to_csv('Produkt - Level1 - ' + current_cat + '_' + str(I) + '.csv') 
-                     df5.to_excel(outpath +file2+'.xlsx',sheet_name = sheet_out,startcol=1)
+                     df5.to_excel(outpath +file2+'.xlsx',sheet_name = sheet_out)
                      l2 = []           
              except:
-                    err_message = 'I = ' + str(I) + ' \n url = ' + url + '\nFehler beim auslesen'
+                    err_message = 'I = ' + str(I) + ' \n url = ' + url + '\n' + 'Fehler beim auslesen'
                     with open(logfile,'a') as f:
-                        f.write('/n' + err_message)  
+                        f.write('\n' + err_message)  
 
     
     #print(l) 
     if 0 < len(l2) < 1000:
          df5 = pandas.DataFrame(l2)
-         df5.set_index('ArtikelNr')
+         df5 = df5.set_index('ArtikelNr')
          file2 = file + '_' + str(len(l))
          df5.to_csv('Produkt - Level1 - ' + current_cat + '_' + str(I) + '.csv') 
-         df5.to_excel(outpath +file2+'.xlsx',sheet_name = sheet_out,startcol=1)
+         df5.to_excel(outpath +file2+'.xlsx',sheet_name = sheet_out)
          l2 = []          
     df4 = pandas.DataFrame(l)
     df4.to_csv(outpath +file + '.csv') 
@@ -528,7 +540,9 @@ localtime = time.asctime( time.localtime(time.time()) )
 
 
 with open(logfile,'a') as f:
-        f.write('end: ' + localtime)        
+        f.write('\n\t No of url access= ' + str(cr))
+        f.write('\n\t No of unknown hersteller= ' + str(na))
+        f.write('\nend: ' + localtime)        
 #exporting website to txt
 #with open('url5.txt','w') as f:
 #    f.write(str(c5))
