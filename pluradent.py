@@ -84,7 +84,7 @@ request_prod0 = 0 #1:= requests url in order do read Product level 0 / 0:= impor
 
 cat0 = {'praxisbedarf','laborbedarf'}
 #cat0 = {'praxisbedarf'}
-cat0 = {'laborbedarf'}
+#cat0 = {'laborbedarf'}
 for cat in cat0:
     print('-----------------------------------------------------')
     print(cat)
@@ -95,7 +95,7 @@ for cat in cat0:
         f.write('\n\n' + cat)
         f.write('\n-------------------------------------\n\n' )
 
-#    url = 'https://shop.pluradent.de/praxisbedarf.html'
+
     r = requests.get(url);cr = cr+1
     c = r.content
     soup = BeautifulSoup(c,"html.parser")
@@ -153,9 +153,7 @@ for cat in cat0:
     df1 = pandas.DataFrame(l)
     df1.to_csv( file + '.csv') 
     df1.to_excel(outpath + file +'.xlsx' ,sheet_name = sheet_out)
-#    writer = ExcelWriter(outxls)
-#    df1.to_excel(writer,sheet)
-#    writer.save()
+
     
 
 
@@ -188,10 +186,7 @@ for cat in cat0:
                  r2 = requests.get(url);cr = cr+1
                  c2 = r2.content
                  soup2 = BeautifulSoup(c2,"html.parser")
-        #url = 'https://shop.pluradent.de/praxisbedarf/praxisinstrumente/instrumente-konservierend.html'         
-        #r2 = requests.get(url)
-        #c2 = r2.content
-        #soup2 = BeautifulSoup(c2,"html.parser")
+
                  url_nohtml = os.path.splitext(url)[0]
                  all_subcat2_name = soup2.find_all("a",{"class":"category-subnav--content--list--entry--link"})
                  K = 0
@@ -282,7 +277,6 @@ for cat in cat0:
                  with open(logfile,'a') as f:
                      f.write('\n\t' + str(row["Kategorie - Level1"]) + ' / ' + row["Kategorie - Level2"] + ' / '  + row["url"]) 
                 
-        #url = 'https://shop.pluradent.de/praxisbedarf/pluline-qualitaetsprodukte/praxismaterial/abformung.html'
                  r3 = requests.get(url);cr = cr+1
                  c3 = r3.content
                  soup3 = BeautifulSoup(c3,"html.parser")
@@ -343,15 +337,11 @@ for cat in cat0:
                       
                  
                  #iterate
-        #        for J in range(1,pagecount+1):
                  for J in range(1,pagecount2+1):
-    #             for J in range(1,2):
-                      
+                     
                      url_page = url+"?p="+str(J)
                      print(url_page)
         
-        #read artikelnummer / url image / name / preis
-        #url_page = 'https://shop.pluradent.de/praxisbedarf/pluline-qualitaetsprodukte/praxismaterial/abformung.html?p=1'
                      r4 = requests.get(url_page);cr = cr+1
                      c4 = r4.content
                      soup4 = BeautifulSoup(c4,"html.parser")
@@ -379,8 +369,6 @@ for cat in cat0:
                          price = pr_info.find("div",{"class":"product-info--price"})
                          price = price.text.replace('\n', '').strip()
                          print(price)
-        #                    <div class="product-info--price ">
-        #                    9,25&nbsp;€</div>
         
                          d = {}
                          d["index"] = row["index"]
@@ -410,7 +398,7 @@ for cat in cat0:
                              l2 = []
                      
             
-#    print(l) 
+
         if 0 < len(l2) < 1000:
              df5 = pandas.DataFrame(l2)
              df5 = df5.set_index('ArtikelNr')
@@ -431,7 +419,7 @@ for cat in cat0:
 
     
         
-    #        "product-info--price "
+
         
     #-----------------------------------------------------------------------------
     #Product Level 1 - info von der spezifischen Produktseite
@@ -522,7 +510,7 @@ for cat in cat0:
                         f.write('\n' + err_message)  
 
     
-    #print(l) 
+
     if 0 < len(l2) < 1000:
          df5 = pandas.DataFrame(l2)
          df5 = df5.set_index('ArtikelNr')
@@ -543,17 +531,7 @@ with open(logfile,'a') as f:
         f.write('\n\t No of url access= ' + str(cr))
         f.write('\n\t No of unknown hersteller= ' + str(na))
         f.write('\nend: ' + localtime)        
-#exporting website to txt
-#with open('url5.txt','w') as f:
-#    f.write(str(c5))
-#
-#with open('url_soup5.txt','w') as f:
-#    f.write(str(soup5))
-#
-#
-#
-#m = re.search('(?<=abc)def', 'abcdef')
-#m.group(0)
+
 
 
 
