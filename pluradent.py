@@ -83,7 +83,7 @@ request_prod0 = 0 #1:= requests url in order do read Product level 0 / 0:= impor
 #------------------------------------------------
 
 cat0 = {'praxisbedarf','laborbedarf'}
-#cat0 = {'praxisbedarf'}
+cat0 = {'praxisbedarf'}
 #cat0 = {'laborbedarf'}
 for cat in cat0:
     print('-----------------------------------------------------')
@@ -385,17 +385,20 @@ for cat in cat0:
                          d["Preis"] = price
                          l.append(d)
                          
+                         
                          d2 = {}
                          d2["ArtikelNr"] = d["ArtikelNr"]
                          d2["Menge"] = 1
                          l2.append(d2)
                          
-                         if len(l2) == 1000:
+                         if len(l) == 1000:
                              df5 = pandas.DataFrame(l2)
                              df5 = df5.set_index('ArtikelNr')
                              file2 = file + '_' + str(len(l))
                              df5.to_excel(outpath +file2+'.xlsx',sheet_name = sheet_out)
                              l2 = []
+                         
+                             
                      
             
 
@@ -405,6 +408,8 @@ for cat in cat0:
              file2 = file + '_' + str(len(l))
              df5.to_excel(outpath +file2+'.xlsx',sheet_name = sheet_out)
              l2 = []
+        
+            
     
         df3 = pandas.DataFrame(l)
         df3.to_csv( file + '.csv') 
@@ -434,10 +439,10 @@ for cat in cat0:
     print('---------------------------------------------------------------------')
     I = 0;J = 0;K = 0
     anz_pl = 0;anz_npl = 0;na = 0
-    l = [];l2=[]
+    l = [];l1=[];l2=[]
     for index,row in df3.iterrows():
          I = I+1
-         if I >= 1:
+         if I >= 54353:
              print ("I=",I,"/", row["Kategorie - Level1"],"/",row["Kategorie - Level2"])
              print (row["Name"],"/",row["ArtikelNr"])
              print (row["url"])
@@ -485,6 +490,7 @@ for cat in cat0:
                  d["HerstellerNr"] = sku_hersteller
                  d["Beschreibung"] = product_desc
                  l.append(d)
+                 l1.append(d)
                  
                  d2 = {}
                  if hersteller.lower() == 'pluradent':
@@ -500,10 +506,15 @@ for cat in cat0:
                  if len(l2) == 1000:
                      df5 = pandas.DataFrame(l2)
                      df5 = df5.set_index('ArtikelNr')
-                     file2 = file + '_' + str(len(l))
-                     df5.to_csv('Produkt - Level1 - ' + current_cat + '_' + str(I) + '.csv') 
+                     file2 = 'Bestellliste_'+file + '_' + str(I)
+#                     df5.to_csv('Produkt - Level1 - ' + current_cat + '_' + str(I) + '.csv') 
                      df5.to_excel(outpath +file2+'.xlsx',sheet_name = sheet_out)
-                     l2 = []           
+                     l2 = []
+                 if len(l) == 5000:
+                     df6 = pandas.DataFrame(l1)
+                     file2 = file + '_' + str(I)
+                     df6.to_excel(outpath +file2+'.xlsx',sheet_name = sheet_out)
+                     l1 = []           
              except:
                     err_message = 'I = ' + str(I) + ' \n url = ' + url + '\n' + 'Fehler beim auslesen'
                     with open(logfile,'a') as f:
@@ -514,18 +525,24 @@ for cat in cat0:
     if 0 < len(l2) < 1000:
          df5 = pandas.DataFrame(l2)
          df5 = df5.set_index('ArtikelNr')
-         file2 = file + '_' + str(len(l))
-         df5.to_csv('Produkt - Level1 - ' + current_cat + '_' + str(I) + '.csv') 
+         file2 = 'Bestellliste_'+file + '_' + str(I)
+         
          df5.to_excel(outpath +file2+'.xlsx',sheet_name = sheet_out)
-         l2 = []          
+         l2 = []  
+    if 0 < len(l1) < 5000:
+             df6 = pandas.DataFrame(l1)
+             file2 = file + '_' + str(I)
+             df6.to_excel(outpath +file2+'.xlsx',sheet_name = sheet_out)
+             l1 = []        
     df4 = pandas.DataFrame(l)
-    df4.to_csv(outpath +file + '.csv') 
+#    df4.to_csv(outpath +file + '.csv') 
     df4.to_excel(outpath +file+ '.xlsx',sheet_name = sheet_out)
-
-    
+    l = []
+    print('END - ' + current_cat)
    
 localtime = time.asctime( time.localtime(time.time()) )     
 
+print('END')
 
 with open(logfile,'a') as f:
         f.write('\n\t No of url access= ' + str(cr))
