@@ -3,12 +3,10 @@
   uses: andymckay/pycodestyle-action@0.1.3
   
 # https://github.com/marketplace/actions/run-flake8-on-your-pr-with-annotations?version=1.0.1
-workflow "on check suite creation, run flake8 and post results" {
-    on = "pull_request"
-    resolves = "run flake8"
-}
-
-action "run flake8" {
-    uses = "tayfun/flake8-your-pr@master"
-    secrets = ["GITHUB_TOKEN"]
-}
+# workflow "on check suite creation, run flake8 and post results" {
+#     on = "pull_request"
+#     resolves = "run flake8"}
+# action "run flake8" {
+#     uses = "tayfun/flake8-your-pr@master"
+#     secrets = ["GITHUB_TOKEN"]
+# }
